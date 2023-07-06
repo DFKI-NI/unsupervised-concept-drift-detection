@@ -1,0 +1,7 @@
+matplotlib==3.6.3
+numpy==1.23.1
+pandas==1.4.3
+river==0.11.1
+scipy==1.8.1
+scikit-learn==1.1.1
+ydata-profiling==4.1.0
