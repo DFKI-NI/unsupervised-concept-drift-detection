@@ -19,8 +19,12 @@ class Summarizer:
 
     def summarize(self):
         for file_ in self.crawler.crawl():
-            print(f"Writing summary of {self.read_root}/{file_} to {self.write_root}/{file_}")
-            writer = SummaryWriter(read_dir=self.read_root, write_dir=self.write_root, sub_path=file_)
+            print(
+                f"Writing summary of {self.read_root}/{file_} to {self.write_root}/{file_}"
+            )
+            writer = SummaryWriter(
+                read_dir=self.read_root, write_dir=self.write_root, sub_path=file_
+            )
             writer.summarize()
 
 

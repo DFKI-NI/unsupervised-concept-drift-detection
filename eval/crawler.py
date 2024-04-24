@@ -6,6 +6,7 @@ class ResultsCrawler:
     A crawler for the file structures in results folders, usually adhering to the pattern
     <data stream>/<detector/experiment>.csv.
     """
+
     def __init__(
         self,
         base_dir: str,

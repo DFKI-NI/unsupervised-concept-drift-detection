@@ -4,16 +4,15 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from ydata_profiling import ProfileReport
 
 from .crawler import ResultsCrawler
 
 
 class SummaryParser(ABC):
     def __init__(
-            self,
-            read_root: str,
-            write_path: str,
+        self,
+        read_root: str,
+        write_path: str,
     ):
         self.read_root = read_root
         self.write_path = write_path
@@ -21,7 +20,9 @@ class SummaryParser(ABC):
 
     def _read_csv(self, file_, metric):
         df = pd.read_csv(os.path.join(self.read_root, file_))
-        drop_metrics = [column for column in df.columns if "(mean)" in column or "(std)" in column]
+        drop_metrics = [
+            column for column in df.columns if "(mean)" in column or "(std)" in column
+        ]
         drop_metrics.remove(f"{metric} (mean)")
         drop_metrics.remove(f"{metric} (std)")
         df.drop(columns=drop_metrics, inplace=True)
@@ -56,13 +57,14 @@ class SummaryToStreamParser(SummaryParser):
 
 
 class SummaryToDetectorParser(SummaryParser):
-    def get_top_n_configurations(self, detector: str, n_configs: int = 5, metric: str = "acc (ht-dd)"):
+    def get_top_n_configurations(
+        self, detector: str, n_configs: int = 5, metric: str = "acc (ht-dd)"
+    ):
         results = pd.DataFrame()
         streams = []
         for file_ in self.crawler.crawl():
             if detector not in file_:
                 continue
-            print(file_)
             df = self._read_csv(file_, metric)
             results = pd.concat((results, df[:n_configs]))
             stream = os.path.dirname(file_)
@@ -70,26 +72,10 @@ class SummaryToDetectorParser(SummaryParser):
         results["stream"] = streams
         Path(self.write_path).mkdir(parents=True, exist_ok=True)
         results.to_csv(f"{self.write_path}/{detector}_{metric[:3]}.csv", index=False)
-        results.reset_index(drop=True, inplace=True)
-        results.drop(columns=["count", "stream"], inplace=True)
-        profile = ProfileReport(
-            results,
-            title=f"{detector}: {metric}",
-            correlations={
-                "auto": {"calculate": True},
-                "pearson": {"calculate": True},
-                "spearman": {"calculate": True},
-                "kendall": {"calculate": True},
-                "phi_k": {"calculate": True},
-                "cramers": {"calculate": True},
-            },
-        )
-        profile.to_file(f"{self.write_path}/{detector}_{metric[:3]}.html")
 
 
 class SummariesToAverageParser(SummaryParser):
     def get_average_rank_per_config(self, detector: str, metric: str):
-        print(f"Writing {metric} rank of {self.read_root}/**/{detector} to {self.write_path}")
         results = []
         streams = []
         for file_ in self.crawler.crawl():
@@ -110,10 +96,9 @@ class SummariesToAverageParser(SummaryParser):
         merged_df["mean rank"] = means
         merged_df["mean % rank"] = means / len(merged_df)
         Path(self.write_path).mkdir(parents=True, exist_ok=True)
-        merged_df.to_csv(f"{self.write_path}/{detector}_{metric[:3]}_rank.csv", index=False)
+        merged_df.to_csv(
+            f"{self.write_path}/{detector}_{metric[:3]}_rank.csv", index=False
+        )
         counts = merged_df.apply(lambda x: x.isna().values.sum(), axis=1)
         counts = counts.value_counts()
-        print("configurations that yielded no results n times:")
-        print(counts)
-        print(counts/len(merged_df))
-        return dict(counts/len(merged_df))
+        return dict(counts / len(merged_df))

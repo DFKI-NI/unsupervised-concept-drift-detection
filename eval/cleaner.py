@@ -54,8 +54,12 @@ class Cleaner:
                 repeat_detections = self._get_periodic_detection_indices(df, drifts)
                 no_detections = self._get_no_detection_indices(df, drifts)
                 full_filter_index = repeat_detections.join(no_detections, how="outer")
-                self._save_df(df.iloc[repeat_detections], self.write_repeats_root, file_)
-                self._save_df(df.iloc[no_detections], self.write_no_detections_root, file_)
+                self._save_df(
+                    df.iloc[repeat_detections], self.write_repeats_root, file_
+                )
+                self._save_df(
+                    df.iloc[no_detections], self.write_no_detections_root, file_
+                )
                 self._save_df(
                     df.drop(index=full_filter_index), self.write_clean_root, file_
                 )
