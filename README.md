@@ -4,9 +4,11 @@
 Fully unsupervised concept drift detectors detected substantial changes in the patterns encoded in data streams by
 observing the feature space only.
 If left unaddressed, these changes could render other models deployed on the data stream unreliable.
-This repository contains multiple fully unsupervised concept drift detectors, a framework to test various
+This repository contains multiple fully unsupervised concept drift detectors, a workflow to test various
 configurations of these detectors on real-world data streams from the literature and the raw results from our 
 experiments.
+The results of this study are fully reproducible with this repository, following the steps outlined
+below.
 
 The implemented concept drift detectors are:
 - Bayesian Non-parametric Detection Method (BNDM) [[doi]](https://doi.org/10.1145/3420034)
@@ -20,7 +22,10 @@ The implemented concept drift detectors are:
 - Unsupervised Concept Drift Detection (UCDD) [[doi]](https://doi.org/10.1142/9789811223334_0017)
 - Unsupervised Change Detection for Activity Recognition (UDetect) [[doi]](https://doi.org/10.1108/IJPCC-03-2017-0027)
 
-Experiment results show that D3 and SPLL are the best-performing detectors across various data streams and metrics.
+Experiment results show that you should use:
+- CSDDM, D3 and SPLL according to lift-per-drift
+- IBDD and many of the other detectors according to accuracy, depending on the data stream
+- D3 and SPLL according to MTR
 Each detector's corresponding publication is listed in the respective detector's file, found in the folder `detectors`.
 
 If you use components from this repository, please cite this work as:
