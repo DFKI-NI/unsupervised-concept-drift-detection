@@ -76,7 +76,9 @@ class SemiParametricLogLikelihood(UnsupervisedDriftDetector):
         closest_centroids = self._calculate_closest_centroids(inverse_covariance_matrix)
         spll = self._calculate_spll(inverse_covariance_matrix, closest_centroids)
         probability = np.exp(-spll)
-        quantile = chi2.ppf(probability, len(self.recent_data[0]))
+        # Kuncheva suggests using the dimensionality of data as degrees of freedom in the chi2 test
+        degrees_of_freedom = len(self.recent_data[0])
+        quantile = chi2.ppf(probability, degrees_of_freedom)
         drift = quantile < self.threshold
         return drift
 
