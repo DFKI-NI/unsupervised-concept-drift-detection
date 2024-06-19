@@ -25,3 +25,5 @@ from .poker_hand import PokerHand
 from .powersupply import Powersupply
 from .rialto_bridge_timelapse import RialtoBridgeTimelapse
 from .sensor_stream import SensorStream
+from .sine_clusters import SineClusters
+from .waveform_drift2 import WaveformDrift2
