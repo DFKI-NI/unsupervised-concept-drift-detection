@@ -39,6 +39,24 @@ def main():
         write_root="results_figures",
     )
     parser.plot_top_metric_boxes(metric="mtr (mean)", show=show)
+    parser = SummaryPlotter(
+        read_root="results_summarized", file="SineClusters"
+    )
+    parser.plot_scatter_metrics_per_file(
+        x_metric="acc (ht-dd) (mean)", y_metric="mtr (mean)", show=show
+    )
+    parser.plot_scatter_metrics_per_file(
+        x_metric="lpd (ht) (mean)", y_metric="mtr (mean)", show=show
+    )
+    parser = SummaryPlotter(
+        read_root="results_summarized", file="WaveformDrift2"
+    )
+    parser.plot_scatter_metrics_per_file(
+        x_metric="acc (ht-dd) (mean)", y_metric="mtr (mean)", show=show
+    )
+    parser.plot_scatter_metrics_per_file(
+        x_metric="lpd (ht) (mean)", y_metric="mtr (mean)", show=show
+    )
 
     # LPD ANALYSIS
     print("\nAnalysing R² of acc with Hoeffding tree and acc with Naive Bayes")

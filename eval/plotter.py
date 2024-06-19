@@ -106,20 +106,21 @@ class SummaryPlotter:
             full_path = os.path.join(self.read_path, file_)
             df = pd.read_csv(full_path)
             df.dropna(inplace=True, subset=[x_metric, y_metric])
-            detector = os.path.basename(os.path.splitext(file_)[0])
-            slope, intercept, r_value, p_value, std_err = linregress(
-                df[x_metric], df[y_metric]
-            )
-            if show:
-                plt.scatter(x=df[x_metric], y=df[y_metric], label=detector)
-                plt.legend()
-                plt.xlabel(x_metric)
-                plt.ylabel(y_metric)
-                plt.title(f"{self.read_path}/{detector}: R²={r_value}")
-                plt.tight_layout()
-                plt.show()
-            else:
-                print(f"{full_path}: R²({x_metric}, {y_metric}) = {r_value}")
+            if len(df) > 0:
+                detector = os.path.basename(os.path.splitext(file_)[0])
+                slope, intercept, r_value, p_value, std_err = linregress(
+                    df[x_metric], df[y_metric]
+                )
+                if show:
+                    plt.scatter(x=df[x_metric], y=df[y_metric], label=detector)
+                    plt.legend()
+                    plt.xlabel(x_metric)
+                    plt.ylabel(y_metric)
+                    plt.title(f"{self.read_path}/{detector}: R²={r_value}")
+                    plt.tight_layout()
+                    plt.show()
+                else:
+                    print(f"{full_path}: R²({x_metric}, {y_metric}) = {r_value}")
 
     def plot_scatter_metrics(
         self,
