@@ -10,6 +10,14 @@ class WaveformDrift2(Waveform):
         seed: int or None = None,
         has_noise: bool = False,
     ):
+        """
+        Init a synthetic data stream based on River's Waveform data stream
+
+        :param drift_frequency: the interval at which concept drift happens
+        :param stream_length: the length of the data stream
+        :seed: the seed
+        :has_noise: whether to include noisy features or not
+        """
         super().__init__(seed, has_noise)
         self.h_functions = [
             self._H_FUNCTION + 0,
@@ -24,6 +32,9 @@ class WaveformDrift2(Waveform):
         self.drifts = [i * self.drift_frequency for i in range(int(stream_length / drift_frequency))][1:]
 
     def drift(self):
+        """
+        Change the waveform functions.
+        """
         new_function = self.rng.choice(self.h_functions, 1)[0]
         if np.all(self._H_FUNCTION == new_function):
             return self.drift()

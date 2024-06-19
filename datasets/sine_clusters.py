@@ -9,6 +9,13 @@ class SineClusters(datasets.base.SyntheticDataset):
         stream_length,
         seed: int or None = None,
     ):
+        """
+        Init a new synthetic data stream with abrupt concept drift.
+
+        :param drift_frequency: the interval between concept drifts
+        :param stream_length: the length of the stream
+        :param seed: the seed for the random number generator
+        """
         super().__init__(
             task=datasets.base.MULTI_CLF,
             n_features=4,
@@ -24,12 +31,20 @@ class SineClusters(datasets.base.SyntheticDataset):
         self.drifts = [i * self.drift_frequency for i in range(int(stream_length / drift_frequency))][1:]
 
     def get_label(self, features):
+        """
+        Determine the label by the Euclidean distance. Only the first two features are used.
+
+        :param features: the features
+        """
         features = features[:2]
         distances = np.linalg.norm(self.centroids - features, axis=1),
         closest_centroid = np.argmin(distances)
         return closest_centroid % 3
 
     def set_centroids(self):
+        """
+        Set the centroids for the class labels.
+        """
         centroids = []
         for i in range(6):
             centroids.append(self.rng.uniform(low=-1, high=1, size=2))
@@ -49,6 +64,9 @@ class SineClusters(datasets.base.SyntheticDataset):
             yield x, y
 
     def drift(self):
+        """
+        Change the concept by creating new centroids and changing the feature generating functions.
+        """
         self.set_centroids()
         new_concept = self.rng.choice([self.concept_one, self.concept_two, self.concept_three], 1)[0]
         while new_concept == self.get_features:
