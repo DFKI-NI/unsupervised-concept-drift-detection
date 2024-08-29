@@ -1,4 +1,4 @@
-# Fully Unsupervised Concept Drift Detectors On Real-World Data Streams: An Empirical Study
+# A benchmark and survey of fully unsupervised concept drift detectors on real-world data streams
 
 ## Abstract
 Fully unsupervised concept drift detectors detected substantial changes in the patterns encoded in data streams by
@@ -28,9 +28,18 @@ Experiment results show that you should use:
 - D3 and SPLL according to MTR
 Each detector's corresponding publication is listed in the respective detector's file, found in the folder `detectors`.
 
+The corresponding paper is published in [The International Journal of Data Science and Analytics](https://link.springer.com/article/10.1007/s41060-024-00620-y). 
 If you use components from this repository, please cite this work as:
 ```
-TODO
+@article{lukats2024,
+	title = {A benchmark and survey of fully unsupervised concept drift detectors on real-world data streams},
+	issn = {2364-4168},
+	doi = {10.1007/s41060-024-00620-y},
+	journal = {International Journal of Data Science and Analytics},
+	author = {Lukats, Daniel and Zielinski, Oliver and Hahn, Axel and Stahl, Frederic},
+	month = aug,
+	year = {2024},
+}
 ```
 If you use a concept drift detector, please cite the corresponding publication of the respective authors as well.
 
