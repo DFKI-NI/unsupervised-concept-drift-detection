@@ -19,11 +19,12 @@ class WaveformDrift2(Waveform):
         :has_noise: whether to include noisy features or not
         """
         super().__init__(seed, has_noise)
+        h = np.array(self._H_FUNCTION)
         self.h_functions = [
-            self._H_FUNCTION + 0,
-            self._H_FUNCTION + 6,
-            6 - self._H_FUNCTION,
-            self._H_FUNCTION * -1,
+            h + 0,
+            h + 6,
+            6 - h,
+            h * -1,
         ]
         self._H_FUNCTION = self.h_functions[0]
         self.drift_frequency = drift_frequency

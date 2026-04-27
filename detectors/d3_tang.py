@@ -46,6 +46,7 @@ class DiscriminativeDriftDetector2019(UnsupervisedDriftDetector):
         self.threshold = threshold
         self.kfold = StratifiedKFold(n_splits=2, shuffle=True, random_state=self.seed)
         self.total_detect_drift_time = 0.0
+        self.total_aspt_time = 0.0
 
     def update(self, features: dict) -> bool:
         """
@@ -68,7 +69,7 @@ class DiscriminativeDriftDetector2019(UnsupervisedDriftDetector):
 
     def _detect_drift(self) -> bool:
         """
-        Detect if a drift occurred.
+        Detect if a drift occurred using Step 2 (AUC check) and Step 3 (ASPT).
 
         :return: True if a drift occurred, else False
         """
@@ -76,10 +77,21 @@ class DiscriminativeDriftDetector2019(UnsupervisedDriftDetector):
         labels = self._get_labels()
         discriminator = LogisticRegression(solver="liblinear", random_state=self.seed)
         predictions = self._predict(discriminator, np.array(self.data), labels)
-        auc_score = roc_auc_score(labels, predictions) #todo : change to permutation test
-        result = auc_score >= self.threshold
+        auc_score = roc_auc_score(labels, predictions)
+        
+        # Step 2: Check if AUC exceeds threshold
+        if auc_score < self.threshold:
+            self.total_detect_drift_time += time.perf_counter() - t_start
+            return False
+        
+        # Step 3: Adaptive Sequential Permutation Test (ASPT)
+        t_aspt = time.perf_counter()
+        p_value = self._aspt_test(discriminator, np.array(self.data), labels, auc_score)
+        self.total_aspt_time += time.perf_counter() - t_aspt
+        
         self.total_detect_drift_time += time.perf_counter() - t_start
-        return result
+        # Confirm drift if p-value < 0.05 (alpha)
+        return p_value < 0.05
 
     def _get_labels(self) -> np.array:
         """
@@ -108,3 +120,43 @@ class DiscriminativeDriftDetector2019(UnsupervisedDriftDetector):
                 :, 1
             ]
         return predictions
+
+    def _aspt_test(self, discriminator, data: np.array, labels: np.array, auc_actual: float, 
+                   bmax: int = 100, bmin: int = 10, alpha: float = 0.05) -> float:
+        """
+        Step 3: Adaptive Sequential Permutation Test (ASPT) inspired by Gandy [30].
+        Performs permutation testing with early stopping to confirm drift significance.
+
+        :param discriminator: the trained discriminator
+        :param data: the data for permutation testing
+        :param labels: the original labels
+        :param auc_actual: the actual AUC score from Step 2
+        :param bmax: maximum number of permutations (default 100)
+        :param bmin: minimum permutations before early stopping (default 10)
+        :param alpha: significance level (default 0.05)
+        :return: p-value from permutation test
+        """
+        ci = 0  # count of permutations with AUC >= AUC_actual
+        
+        for i in range(1, bmax + 1):
+            # Shuffle labels randomly
+            labels_perm = np.random.permutation(labels)
+            
+            # Retrain and compute AUC on permuted data
+            predictions_perm = self._predict(discriminator, data, labels_perm)
+            auc_perm = roc_auc_score(labels_perm, predictions_perm)
+            
+            # Count permutations with AUC >= actual AUC
+            if auc_perm >= auc_actual:
+                ci += 1
+            
+            # Early reject H0: If ci=0, i>=Bmin, and 1/(i+1) < alpha, confirm drift
+            if ci == 0 and i >= bmin and 1 / (i + 1) < alpha:
+                return 1 / (i + 1)
+            
+            # Early accept H0: If ci/i > 2*alpha, i>=Bmin, declare no drift
+            if ci / i > 2 * alpha and i >= bmin:
+                return 1.0
+        
+        # Terminal: If Bmax is reached, compute final p-value
+        return (ci + 1) / (bmax + 1)

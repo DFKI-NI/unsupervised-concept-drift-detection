@@ -35,3 +35,28 @@ class PokerHand(base.FileDataset):
                 "class": int,
             }
         )
+
+
+class PokerHandRaw(base.FileDataset):
+    def __init__(self, directory_path: str = "datasets/files"):
+        super().__init__(
+            n_samples=1_025_010,
+            n_features=10,
+            task=base.MULTI_CLF,
+            filename="poker-hand.csv",
+        )
+        self.full_path = path.join(directory_path, self.filename)
+
+    def __iter__(self):
+        return stream.iter_csv(
+            self.full_path,
+            target="class",
+            converters={
+                "S1": int, "C1": int,
+                "S2": int, "C2": int,
+                "S3": int, "C3": int,
+                "S4": int, "C4": int,
+                "S5": int, "C5": int,
+                "class": int,
+            },
+        )

@@ -1,3 +1,4 @@
+import time
 from typing import List, Optional
 
 from metrics.metrics import get_metrics
@@ -60,11 +61,16 @@ class ModelOptimizer:
                 labels = []
                 predictions = []
                 train_steps = 0
+                total_update_time = 0.0
+                t_run_start = time.perf_counter()
                 for i, (x, y) in enumerate(stream):
                     if i != 0:
                         predictions.append(self.classifiers.predict(x))
                         labels.append(y)
-                    if model.update(x):
+                    t0 = time.perf_counter()
+                    updated = model.update(x)
+                    total_update_time += time.perf_counter() - t0
+                    if updated:
                         drifts.append(i)
                         self.classifiers.reset()
                         train_steps = 0
@@ -72,3 +78,10 @@ class ModelOptimizer:
                     train_steps += 1
                 metrics = get_metrics(stream, drifts, labels, predictions)
                 logger.log(config, metrics, drifts)
+                total_run_time = time.perf_counter() - t_run_start
+                print(f"  [Timing] total run time            : {total_run_time:.3f}s")
+                print(f"  [Timing] total update() time       : {total_update_time:.3f}s")
+                if hasattr(model, 'total_detect_drift_time'):
+                    print(f"  [Timing] total _detect_drift() time: {model.total_detect_drift_time:.3f}s")
+                if hasattr(model, 'total_aspt_time'):
+                    print(f"  [Timing] total _aspt_test() time   : {model.total_aspt_time:.3f}s")

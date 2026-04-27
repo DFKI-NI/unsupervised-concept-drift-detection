@@ -12,10 +12,10 @@ class Insects(base.FileDataset):
 
     def __iter__(self):
         converters = {f"Att{i}": float for i in range(1, 34)}
-        converters["class"] = str
+        converters["Class"] = str
         return stream.iter_csv(
             self.full_path,
-            target="class",
+            target="Class",
             converters=converters,
         )
 
@@ -255,4 +255,78 @@ class InsectsIncrementalReoccurringImbalanced(Insects):
             filename="INSECTS-incremental-reoccurring_imbalanced_norm.csv",
         )
         self.drifts = [150_683, 301_365]
+        self.full_path = path.join(directory_path, self.filename)
+
+
+class InsectsNoHeader(base.FileDataset):
+    """Base class for INSECTS files without header row."""
+
+    _NAMES = [f"Att{i}" for i in range(1, 34)] + ["Class"]
+
+    def __init__(self, **desc):
+        super().__init__(**desc)
+        self.full_path = ""
+
+    def __iter__(self):
+        import csv
+        with open(self.full_path, newline="") as f:
+            reader = csv.DictReader(f, fieldnames=self._NAMES)
+            for row in reader:
+                x = {k: float(row[k]) for k in self._NAMES[:-1]}
+                y = row["Class"]
+                yield x, y
+
+
+class InsectsGradualBalancedRaw(InsectsNoHeader):
+    """Gradual balanced INSECTS stream (no header, raw file)."""
+
+    def __init__(self, directory_path: str = "datasets/files"):
+        super().__init__(
+            n_samples=24150,
+            n_features=33,
+            task=base.MULTI_CLF,
+            filename="INSECTS gradual_balanced.csv",
+        )
+        self.drifts = [14_028]
+        self.full_path = path.join(directory_path, self.filename)
+
+
+class InsectsIncrementalBalancedRaw(InsectsNoHeader):
+    """Incremental balanced INSECTS stream (no header, raw file)."""
+
+    def __init__(self, directory_path: str = "datasets/files"):
+        super().__init__(
+            n_samples=57018,
+            n_features=33,
+            task=base.MULTI_CLF,
+            filename="INSECTS incremental_balanced.csv",
+        )
+        self.full_path = path.join(directory_path, self.filename)
+
+
+class InsectsIncrementalAbruptBalancedRaw(InsectsNoHeader):
+    """Incremental-abrupt balanced INSECTS stream (no header, raw file)."""
+
+    def __init__(self, directory_path: str = "datasets/files"):
+        super().__init__(
+            n_samples=79986,
+            n_features=33,
+            task=base.MULTI_CLF,
+            filename="INSECTS incremental-abrupt_balanced.csv",
+        )
+        self.drifts = [26_568, 53_364]
+        self.full_path = path.join(directory_path, self.filename)
+
+
+class InsectsIncrementalReoccurringBalancedRaw(InsectsNoHeader):
+    """Incremental-reoccurring balanced INSECTS stream (no header, raw file)."""
+
+    def __init__(self, directory_path: str = "datasets/files"):
+        super().__init__(
+            n_samples=79986,
+            n_features=33,
+            task=base.MULTI_CLF,
+            filename="INSECTS incremental-reoccurring_balanced.csv",
+        )
+        self.drifts = [26_568, 53_364]
         self.full_path = path.join(directory_path, self.filename)

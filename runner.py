@@ -1,4 +1,4 @@
-from config import Configuration
+from config_v2 import Configuration
 
 
 def run(experiment_name):
